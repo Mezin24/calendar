@@ -1,20 +1,25 @@
 import { Button, Layout } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useActions } from '../hooks/useActions';
+import { useTypedSelector } from '../hooks/useTypedSelector';
 import { RouteNames } from '../router';
-import { useTypedSelectot } from '../hooks/useTypedSelector';
 
 export const Navbar = () => {
   const navigate = useNavigate();
-  const { isAuth } = useTypedSelectot((state) => state.auth);
+  const { isAuth, user } = useTypedSelector((state) => state.auth);
+  const { logout } = useActions();
+
   return isAuth ? (
     <Layout.Header
       style={{
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center',
+        gap: '15px',
       }}
     >
-      <Button ghost onClick={() => console.log('logout')}>
+      <div style={{ color: 'white' }}>{user.username}</div>
+      <Button ghost onClick={logout}>
         Logout
       </Button>
     </Layout.Header>
@@ -24,10 +29,8 @@ export const Navbar = () => {
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        gap: '15px',
       }}
     >
-      <div style={{ color: 'white' }}>Mezin24</div>
       <Button
         ghost
         onClick={() => navigate(RouteNames.EVENTS, { replace: true })}

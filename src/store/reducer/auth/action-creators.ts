@@ -8,6 +8,7 @@ import {
   SetIsLoadinghAction,
   SetUserhAction,
 } from './types';
+import { UserService } from '../../../api/userService';
 
 export const AuthActionCreator = {
   setAuth: (isAuth: boolean): SetAuthAction => ({
@@ -30,13 +31,32 @@ export const AuthActionCreator = {
     (username: string, password: string) => async (dispatch: AppDispatch) => {
       try {
         dispatch(AuthActionCreator.setIsLoading(true));
-        const response = await axios.get<User[]>('/users.json');
-        console.log(response);
+        setTimeout(async () => {
+          const { data } = await UserService.fetchUsers();
+          const user = data.find(
+            (item) => item.username === username && item.password === password
+          );
+          if (!user) {
+            return dispatch(
+              AuthActionCreator.setError('Incorrect user or password')
+            );
+          } else {
+            dispatch(AuthActionCreator.setUser(user));
+            dispatch(AuthActionCreator.setAuth(true));
+            localStorage.setItem('auth', 'true');
+            localStorage.setItem('user', user.username);
+          }
+        }, 1000);
       } catch (error) {
         dispatch(
           AuthActionCreator.setError('Some problems while fetching user')
         );
       }
     },
-  logout: () => async (dispatch: AppDispatch) => {},
+  logout: () => async (dispatch: AppDispatch) => {
+    localStorage.removeItem('auth');
+    localStorage.removeItem('user');
+    dispatch(AuthActionCreator.setUser({} as User));
+    dispatch(AuthActionCreator.setAuth(false));
+  },
 };
